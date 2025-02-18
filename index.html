@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Magnifier</title>
+    <style>
+        body,
+        html {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            min-width: 700px;
+            background: rgb(202, 201, 201);
+        }
+
+        .container {
+            width: 650px;
+            height: 400px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 5px solid rgb(244, 254, 255);
+            position: relative;
+        }
+
+        #zoom img {
+            width: 650px;
+            height: 400px;
+        }
+
+        #lens {
+            position: absolute;
+            border: 2px solid grey;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: none;
+            box-shadow: inset 0 0 10px 2px grey;
+            filter: drop-shadow(0 0 2px grey);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="zoom">
+            <img src="https://i.pinimg.com/originals/6b/6b/69/6b6b69d024e696f8d928532edeeb676d.jpg" alt="Zoom Image">
+        </div>
+    </div>
+
+    <script>
+        // Lens size (adjustable)
+        const lensSize = 200;
+
+        function magnify(id, zoom) {
+            const el = document.getElementById(id);
+            const img = el.querySelector("img");
+
+            // Create lens
+            const lens = document.createElement("div");
+            lens.setAttribute("id", "lens");
+            lens.style.width = lensSize + "px";
+            lens.style.height = lensSize + "px";
+            el.appendChild(lens);
+
+            // Create zoomed image copy
+            const copy = img.cloneNode(true);
+            copy.style.position = "absolute";
+            copy.style.width = (img.offsetWidth * zoom) + "px";
+            copy.style.height = (img.offsetHeight * zoom) + "px";
+            lens.appendChild(copy);
+
+            // Mouse move event
+            el.addEventListener("mousemove", (event) => {
+                event.preventDefault();
+                
+                const pos = getCursorPos(event, el);
+                let leftPos = pos.x - lensSize / 2;
+                let topPos = pos.y - lensSize / 2;
+
+                // Keep lens inside the image
+                if (leftPos < 0) leftPos = 0;
+                if (topPos < 0) topPos = 0;
+                if (leftPos > img.width - lensSize) leftPos = img.width - lensSize;
+                if (topPos > img.height - lensSize) topPos = img.height - lensSize;
+
+                // Move lens
+                lens.style.left = leftPos + "px";
+                lens.style.top = topPos + "px";
+
+                // Move zoomed image inside the lens
+                copy.style.left = -leftPos * zoom + "px";
+                copy.style.top = -topPos * zoom + "px";
+            });
+        }
+
+        function getCursorPos(event, element) {
+            const rect = element.getBoundingClientRect();
+            return {
+                x: event.clientX - rect.left,
+                y: event.clientY - rect.top
+            };
+        }
+
+        // Initialize magnifier with zoom level 4
+        magnify("zoom", 4);
+    </script>
+
+</body>
+</html>
